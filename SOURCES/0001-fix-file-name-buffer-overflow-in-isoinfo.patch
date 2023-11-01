@@ -1,0 +1,40 @@
+From 05c639c8a0f61da73ca8f1f725f8f5394d8bf15f Mon Sep 17 00:00:00 2001
+From: Jakub Martisko <jamartis@redhat.com>
+Date: Thu, 2 Aug 2018 09:34:18 +0200
+Subject: [PATCH] fix: file name buffer overflow in isoinfo
+
+---
+ genisoimage/diag/isoinfo.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/genisoimage/diag/isoinfo.c b/genisoimage/diag/isoinfo.c
+index 3cc2678..a08141d 100644
+--- a/genisoimage/diag/isoinfo.c
++++ b/genisoimage/diag/isoinfo.c
+@@ -763,6 +763,11 @@ parse_dir(char *rootname, int extent, int len)
+ 				strcat(td->name, name_buf);
+ 				strcat(td->name, "/");
+ 			} else {
++				if ( (PATH_MAX - strlen(rootname)) < strlen(name_buf))
++				{
++					fprintf(stderr, "Name too long: %s%s\n", rootname, name_buf);
++					exit(1);
++				}	
+ 				strcpy(testname, rootname);
+ 				strcat(testname, name_buf);
+ 				if (xtract && strcmp(xtract, testname) == 0) {
+@@ -772,6 +777,11 @@ parse_dir(char *rootname, int extent, int len)
+ 			if (do_find &&
+ 			    (idr->name_len[0] != 1 ||
+ 			    (idr->name[0] != 0 && idr->name[0] != 1))) {
++				if ( (PATH_MAX - strlen(rootname)) < strlen(name_buf))
++				{
++					fprintf(stderr, "Name too long: %s%s\n", rootname, name_buf);
++					exit(1);
++				}	
+ 				strcpy(testname, rootname);
+ 				strcat(testname, name_buf);
+ 				printf("%s\n", testname);
+-- 
+2.14.4
+
